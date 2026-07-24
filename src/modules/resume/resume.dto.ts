@@ -1,0 +1,6 @@
+import { Types } from "mongoose";
+
+export interface UploadResumeDto {
+    userId: string;
+    file: Express.Multer.File;
+}

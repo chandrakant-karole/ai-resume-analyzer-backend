@@ -7,6 +7,7 @@ import morgan from "morgan";
 import { errorHandler } from "./middlewares/error.middleware";
 import { notFound } from "./middlewares/notFound.middleware";
 import authRoutes from "./modules/auth/auth.route";
+import resumeRoutes from "./modules/resume/resume.route";
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.get("/", (_, res) => {
 });
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/resume", resumeRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
