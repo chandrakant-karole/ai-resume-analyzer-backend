@@ -5,6 +5,7 @@ import { Resume } from "../resume/resume.model";
 import { Analysis } from "./analysis.model";
 import { buildResumeAnalysisPrompt } from "../../prompts/resume-analysis.prompt";
 import { parseAnalysisResponse } from "./analysis.parser";
+import logger from "../../utils/logger";
 
 class AnalysisService {
     private async getOwnedResume(
@@ -24,27 +25,31 @@ class AnalysisService {
     }
 
     async analyzeResume(userId: string, resumeId: string | string[]) {
-        // Step 1: Find the resume
         const resume = await this.getOwnedResume(
             userId,
             resumeId
         );
 
-        // Step 2: Check if analysis already exists
         const existingAnalysis = await Analysis.findOne({
             resume: resume._id,
         });
 
         if (existingAnalysis) {
+            logger.warn(
+                `Analysis already exists for resume ${resume._id}`
+            );
+
             return existingAnalysis;
         }
 
-        // Step 3: Build AI prompt
         const prompt = buildResumeAnalysisPrompt(
             resume.extractedText
         );
 
-        // Step 4: Call Gemini
+        logger.info(
+            `Starting AI analysis for resume ${resume._id} (user: ${userId})`
+        );
+
 
         const response = await gemini.models.generateContent({
             model: "gemini-flash-latest",
@@ -60,9 +65,7 @@ class AnalysisService {
             );
         }
 
-        // Step 5: Validate AI response
         const result = parseAnalysisResponse(text);
-        // Step 6: Save analysis
         const analysis = await Analysis.create({
             resume: resume._id,
 
@@ -76,7 +79,10 @@ class AnalysisService {
 
             suggestions: result.suggestions,
         });
-        // Step 7: Return analysis
+
+        logger.info(
+            `AI analysis completed for resume ${resume._id}`
+        );
         return analysis;
     }
 

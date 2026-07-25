@@ -2,6 +2,7 @@ import { ErrorRequestHandler } from "express";
 import multer from "multer";
 
 import { ApiError } from "../utils/ApiError";
+import logger from "../utils/logger";
 
 export const errorHandler: ErrorRequestHandler = (
   err,
@@ -32,7 +33,7 @@ export const errorHandler: ErrorRequestHandler = (
     }
   }
 
-  console.error(err);
+  logger.error(err);
 
   return res.status(500).json({
     success: false,

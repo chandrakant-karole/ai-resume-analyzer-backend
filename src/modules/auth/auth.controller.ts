@@ -3,10 +3,10 @@ import { Request, Response } from "express";
 import authService from "./auth.service";
 
 import { asyncHandler } from "../../utils/asyncHandler";
-import { ApiResponse } from "../../utils/ApiResponse";
 import { cookieOptions } from "../../config/cookie";
 import { LoginDto, RegisterDto } from "./auth.dto";
 import { sendResponse } from "../../utils/sendResponse";
+import logger from "../../utils/logger";
 
 class AuthController {
     register = asyncHandler(async (req: Request, res: Response) => {
@@ -14,7 +14,7 @@ class AuthController {
         const result = await authService.register(data);
 
         res.cookie("token", result.token, cookieOptions);
-
+        logger.info(`User registered: ${result.user.email}`);
         return sendResponse({
             res,
             statusCode: 201,
@@ -29,7 +29,7 @@ class AuthController {
         const result = await authService.login(data);
 
         res.cookie("token", result.token, cookieOptions);
-
+        logger.info(`User logged in: ${result.user.email}`);
         return sendResponse({
             res,
             statusCode: 200,

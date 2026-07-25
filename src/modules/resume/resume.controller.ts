@@ -6,6 +6,7 @@ import { sendResponse } from "../../utils/sendResponse";
 
 import { resumeService } from "./resume.service";
 import { IdParams } from "../../types/params.types";
+import logger from "../../utils/logger";
 
 
 export const uploadResume = asyncHandler(
@@ -18,7 +19,9 @@ export const uploadResume = asyncHandler(
             userId: req.user!.userId,
             file: req.file,
         });
-
+        logger.info(
+            `Resume uploaded: ${resume.originalFileName}`
+        );
         sendResponse({
             res,
             statusCode: 201,
@@ -84,7 +87,9 @@ export const deleteResume = asyncHandler(async (req, res) => {
         req.user.userId,
         id
     );
-
+    logger.info(
+        `Resume deleted: ${id}`
+    );
     sendResponse({
         res,
         statusCode: 200,
