@@ -8,6 +8,7 @@ import { errorHandler } from "./middlewares/error.middleware";
 import { notFound } from "./middlewares/notFound.middleware";
 import authRoutes from "./modules/auth/auth.route";
 import resumeRoutes from "./modules/resume/resume.route";
+import analysisRoutes from "./modules/analysis/analysis.route";
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.get("/", (_, res) => {
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/resume", resumeRoutes);
+app.use("/api/v1/analysis", analysisRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
