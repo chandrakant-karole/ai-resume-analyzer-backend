@@ -1,9 +1,10 @@
 import fs from "node:fs/promises";
+import path from "node:path";
 import pdfParse from "pdf-parse";
-
 import { ApiError } from "../../utils/ApiError";
 import { Resume } from "./resume.model";
 import { UploadResumeDto } from "./resume.dto";
+import { Analysis } from "../analysis/analysis.model";
 
 class ResumeService {
     private async extractPdfText(filePath: string): Promise<string> {
@@ -60,6 +61,31 @@ class ResumeService {
         }
 
         return resume;
+    }
+
+    async deleteResume(userId: string, resumeId: string | string[]) {
+        const resume = await Resume.findOne({
+            _id: resumeId,
+            user: userId,
+        });
+
+        if (!resume) {
+            throw new ApiError(404, "Resume not found.");
+        }
+
+        try {
+            await fs.unlink(path.resolve(resume.filePath));
+        } catch (error: any) {
+            if (error.code !== "ENOENT") {
+                throw error;
+            }
+        }
+
+        await Analysis.deleteMany({
+            resume: resume._id,
+        });
+
+        await resume.deleteOne();
     }
 }
 

@@ -68,3 +68,27 @@ export const getResumeById = asyncHandler(async (req: Request, res: Response) =>
         data: resume,
     });
 });
+
+export const deleteResume = asyncHandler(async (req, res) => {
+    if (!req.user) {
+        throw new ApiError(401, "Unauthorized");
+    }
+
+    const { id } = req.params;
+
+    if (!id) {
+        throw new ApiError(400, "Resume ID is required.");
+    }
+
+    await resumeService.deleteResume(
+        req.user.userId,
+        id
+    );
+
+    sendResponse({
+        res,
+        statusCode: 200,
+        message: "Resume deleted successfully.",
+        data: null,
+    });
+});
