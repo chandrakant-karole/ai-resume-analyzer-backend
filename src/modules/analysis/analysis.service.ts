@@ -7,8 +7,10 @@ import { buildResumeAnalysisPrompt } from "../../prompts/resume-analysis.prompt"
 import { parseAnalysisResponse } from "./analysis.parser";
 
 class AnalysisService {
-    async analyzeResume(userId: string, resumeId: string | string[]) {
-        // Step 1: Find the resume
+    private async getOwnedResume(
+        userId: string,
+        resumeId: string | string[]
+    ) {
         const resume = await Resume.findOne({
             _id: resumeId,
             user: userId,
@@ -17,6 +19,16 @@ class AnalysisService {
         if (!resume) {
             throw new ApiError(404, "Resume not found.");
         }
+
+        return resume;
+    }
+
+    async analyzeResume(userId: string, resumeId: string | string[]) {
+        // Step 1: Find the resume
+        const resume = await this.getOwnedResume(
+            userId,
+            resumeId
+        );
 
         // Step 2: Check if analysis already exists
         const existingAnalysis = await Analysis.findOne({
@@ -33,7 +45,7 @@ class AnalysisService {
         );
 
         // Step 4: Call Gemini
-        
+
         const response = await gemini.models.generateContent({
             model: "gemini-flash-latest",
             contents: prompt,
@@ -65,6 +77,40 @@ class AnalysisService {
             suggestions: result.suggestions,
         });
         // Step 7: Return analysis
+        return analysis;
+    }
+
+    async getAnalysis(userId: string, resumeId: string | string[]) {
+        const resume = await this.getOwnedResume(
+            userId,
+            resumeId
+        );
+
+        const analysis = await Analysis.findOne({
+            resume: resume._id,
+        });
+
+        if (!analysis) {
+            throw new ApiError(404, "Analysis not found.");
+        }
+
+        return analysis;
+    }
+
+    async deleteAnalysis(userId: string, resumeId: string | string[]) {
+        const resume = await this.getOwnedResume(
+            userId,
+            resumeId
+        );
+
+        const analysis = await Analysis.findOneAndDelete({
+            resume: resume._id,
+        });
+
+        if (!analysis) {
+            throw new ApiError(404, "Analysis not found.");
+        }
+
         return analysis;
     }
 }
