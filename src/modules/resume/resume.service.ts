@@ -45,9 +45,27 @@ class ResumeService {
     }
 
     async getUserResumes(userId: string) {
-        return Resume.find({ user: userId })
+        const resumes = await Resume.find({ user: userId })
             .select("originalFileName createdAt updatedAt")
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .lean();
+
+        const resumeIds = resumes.map((resume) => resume._id);
+
+        const analyses = await Analysis.find({
+            resume: { $in: resumeIds },
+        })
+            .select("resume")
+            .lean();
+
+        const analyzedResumeIds = new Set(
+            analyses.map((analysis) => analysis.resume.toString())
+        );
+
+        return resumes.map((resume) => ({
+            ...resume,
+            hasAnalysis: analyzedResumeIds.has(resume._id.toString()),
+        }));
     }
 
     async getResumeById(userId: string, resumeId: string | string[]) {
