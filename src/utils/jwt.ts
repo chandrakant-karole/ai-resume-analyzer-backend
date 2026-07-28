@@ -4,7 +4,7 @@ import { JwtPayload } from "../types/jwt.types";
 
 export const generateToken = (payload: JwtPayload) => {
     return jwt.sign(payload, env.JWT_SECRET, {
-        expiresIn: "7d",
+        expiresIn: env.JWT_EXPIRES_IN as unknown as number,
     });
 };
 

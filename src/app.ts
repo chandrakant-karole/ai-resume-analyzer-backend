@@ -14,7 +14,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: process.env.CLIENT_URL,
     credentials: true,
   })
 );
@@ -32,7 +32,7 @@ app.use(morgan("dev"));
 app.get("/", (_, res) => {
   res.json({
     success: true,
-    message: "AI Resume Analyzer API",
+    message: "AI Resume Analyzer API is running",
   });
 });
 
